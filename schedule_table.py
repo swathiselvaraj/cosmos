@@ -2,19 +2,18 @@ import requests
 import json
 import sqlite3
 
-# Fetch the JSON data from the URL
 json_url_dataset1 = "https://challenge.usecosmos.cloud/flight_schedules.json"
 response = requests.get(json_url_dataset1)
 data = response.json()
 
-# Extract flights information
-flights = data['FlightStatusResource']['Flights']['Flight']
+# Extracting information
+flights_details = data['FlightStatusResource']['Flights']['Flight']
 
 # List to store dictionaries for each flight
 flights_list = []
 
 # Iterate over each flight and extract relevant information
-for flight in flights:
+for flight in flights_details:
     flight_dict = {
         'DepartureAirport': flight['Departure']['AirportCode'],
         'ScheduledDepartureTimeLocal': flight['Departure']['ScheduledTimeLocal']['DateTime'],
@@ -39,29 +38,19 @@ for flight in flights:
     }
     flights_list.append(flight_dict)
 
-# Print out the type and length of data to understand its structure
-print("Type of data:", type(data))
-print("Length of data:", len(flights_list))
-
-print(flights_list)
-
 conn = sqlite3.connect('flight_delays.db')
 cursor = conn.cursor()
 
-# Create table if not exists
+# Create table flight_schedules if not exists
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS flight_schedules (
     DepartureAirport VARCHAR(10),
-    ScheduledDepartureTimeLocal TEXT,
     ScheduledDepartureTimeUTC DATETIME,
-    ActualDepartureTimeLocal TEXT,
     ActualDepartureTimeUTC TEXT,
     DepartureTerminal TEXT,
     DepartureGate TEXT,
     ArrivalAirport TEXT,
-    ScheduledArrivalTimeLocal TEXT,
     ScheduledArrivalTimeUTC TEXT,
-    ActualArrivalTimeLocal TEXT,
     ActualArrivalTimeUTC TEXT,
     ArrivalTerminal TEXT,
     ArrivalGate TEXT,
@@ -78,17 +67,17 @@ cursor.execute('''
 for flight in flights_list:
     cursor.execute('''
         INSERT INTO flight_schedules (
-            DepartureAirport, ScheduledDepartureTimeLocal, ScheduledDepartureTimeUTC, ActualDepartureTimeLocal,
-            ActualDepartureTimeUTC, DepartureTerminal, DepartureGate, ArrivalAirport, ScheduledArrivalTimeLocal,
-            ScheduledArrivalTimeUTC, ActualArrivalTimeLocal, ActualArrivalTimeUTC, ArrivalTerminal, ArrivalGate,
+            DepartureAirport, ScheduledDepartureTimeUTC,
+            ActualDepartureTimeUTC, DepartureTerminal, DepartureGate, ArrivalAirport, 
+            ScheduledArrivalTimeUTC, ActualArrivalTimeUTC, ArrivalTerminal, ArrivalGate,
             AirlineID, FlightNumber, AircraftCode, AircraftRegistration, FlightStatus, ServiceType
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
-        flight['DepartureAirport'], flight['ScheduledDepartureTimeLocal'], flight['ScheduledDepartureTimeUTC'],
-        flight['ActualDepartureTimeLocal'], flight['ActualDepartureTimeUTC'], flight['DepartureTerminal'],
-        flight['DepartureGate'], flight['ArrivalAirport'], flight['ScheduledArrivalTimeLocal'],
-        flight['ScheduledArrivalTimeUTC'], flight['ActualArrivalTimeLocal'], flight['ActualArrivalTimeUTC'],
+        flight['DepartureAirport'], flight['ScheduledDepartureTimeUTC'],
+        flight['ActualDepartureTimeLocal'], flight['DepartureTerminal'],
+        flight['DepartureGate'], flight['ArrivalAirport'],
+        flight['ScheduledArrivalTimeUTC'], flight['ActualArrivalTimeUTC'],
         flight['ArrivalTerminal'], flight['ArrivalGate'], flight['AirlineID'], flight['FlightNumber'],
         flight['AircraftCode'], flight['AircraftRegistration'], flight['FlightStatus'], flight['ServiceType']
     ))

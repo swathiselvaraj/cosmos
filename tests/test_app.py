@@ -3,7 +3,6 @@ from app import app
 from unittest.mock import patch, MagicMock
 
 class TestFlightAPI(unittest.TestCase):
-
     def setUp(self):
         self.app = app.test_client()
         self.app.testing = True

@@ -17,7 +17,6 @@
                 <h1 class="mb-0" style="color: rgba(255, 196, 0, 0.76);">INVENTORY BROWSER</h1>
             </div>
         </div>
-       
 
         <form id="filter-form">
             <div class="form-group">
@@ -42,7 +41,6 @@
             event.preventDefault();
             const airline = document.getElementById('airline').value;
             const destination = document.getElementById('destination').value;
-
             let query = '/api/flights?';
             if (airline) query += `airline=${airline}&`;
             if (destination) query += `destination=${destination}&`;

@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
+#to connect to database
 def get_db_connection():
     conn = sqlite3.connect('flight_delays.db')
     conn.row_factory = sqlite3.Row
@@ -12,7 +13,6 @@ def get_db_connection():
 @app.route('/api/flights', methods=['GET'])
 def get_flights():
     airline = request.args.get('airline')
-    origin = request.args.get('origin')
     destination = request.args.get('destination')
 
     query = """
@@ -63,7 +63,9 @@ def get_flights():
     conn.close()
 
     flights = []
-    flight_ids = set()  # Track unique flight identifiers to avoid duplicates
+    flight_ids = set() 
+
+    #To fetch and display the output data
     for row in rows:
         flight_identifier = (row["flight_number"], row["airline"], row["origin"], row["destination"], row["scheduled_departure_at"], row["actual_departure_at"])
         if flight_identifier in flight_ids:
@@ -71,7 +73,7 @@ def get_flights():
         flight_ids.add(flight_identifier)
         
         flight = {
-            "id": str(uuid.uuid4()),  # Generate a unique UUID
+            "id": str(uuid.uuid4()),  # Generating unique UUID
             "flight_number": row["flight_number"],
             "airline": row["airline"],
             "origin": row["origin"],

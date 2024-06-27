@@ -5,9 +5,9 @@ import sqlite3
 json_url_dataset2 = "https://challenge.usecosmos.cloud/flight_delays.json"
 response = requests.get(json_url_dataset2)
 data = response.json()
-flights_list = []
+flights_delay_info = []
 
-# Check the structure of `data`
+#list of all the data in the json file fetch it as required
 if isinstance(data, list):
     for flight in data:
         flight_info = {
@@ -35,20 +35,18 @@ if isinstance(data, list):
             'OriginalArrivalStationIATA': flight['FlightLegs'][0]['Diversion']['OriginalArrivalStation']['IATA'] if flight['FlightLegs'][0].get('Diversion') else None,
             'OriginalArrivalStationICAO': flight['FlightLegs'][0]['Diversion']['OriginalArrivalStation']['ICAO'] if flight['FlightLegs'][0].get('Diversion') else None,
         }
-        flights_list.append(flight_info)
+        flights_delay_info.append(flight_info)
 
 else:
     print("Unexpected data structure. Expected a list of flights.")
 
-# Print out the type and length of data to understand its structure
-print("Type of data:", type(flights_list))
-print("Length of data:", len(flights_list))
+
 
 # Connect to SQLite database (or create it if it doesn't exist)
 conn = sqlite3.connect('flight_delays.db')
 cursor = conn.cursor()
 
-# Create a flights table if it doesn't exist
+# Creating a flight_delays table if it doesn't exist
 create_table_query = """
 CREATE TABLE IF NOT EXISTS flight_delays (
     FlightCode VARCHAR(10),
@@ -77,9 +75,8 @@ CREATE TABLE IF NOT EXISTS flight_delays (
 );
 """
 cursor.execute(create_table_query)
-
-# Insert data into the table
-for flight in flights_list:
+# Inserting data into the table
+for flight in flights_delay_info:
     insert_query = """
     INSERT INTO flight_delays (
         FlightCode, Airline, FlightNumber, FlightIdDate,
@@ -106,7 +103,7 @@ for flight in flights_list:
     )
     cursor.execute(insert_query, values)
 
-# Commit changes and close connection
+# Commiting changes and closing connection
 conn.commit()
 conn.close()
 
