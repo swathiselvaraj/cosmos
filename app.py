@@ -54,9 +54,6 @@ def get_flights():
         query += " AND fs.ArrivalAirport = ?"
         params.append(destination)
 
-    print("Executing query:", query)  # Debugging: print the query
-    print("With parameters:", params)  # Debugging: print the parameters
-
     conn = get_db_connection()
     cursor = conn.execute(query, params)
     rows = cursor.fetchall()
